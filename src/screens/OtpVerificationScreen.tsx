@@ -1,31 +1,70 @@
-import type React from "react"
-import { useRef, useState } from "react"
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import type { NativeStackScreenProps } from "@react-navigation/native-stack"
-import type { RootStackParamList } from "@/navigation/types"
+import type React from "react";
+import { useRef, useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/navigation/types";
+import auth from "@react-native-firebase/auth";
 
-type Props = NativeStackScreenProps<RootStackParamList, "OtpVerification">
+type Props = NativeStackScreenProps<RootStackParamList, "OtpVerification">;
 
 export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
-  const [otp, setOtp] = useState(["", "", "", ""])
-  const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null])
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { verificationId, phoneNumber } = route.params;
+  const inputRefs = useRef<Array<TextInput | null>>([null, null, null, null, null, null]);
 
   const handleOtpChange = (value: string, index: number) => {
-    const newOtp = [...otp]
-    newOtp[index] = value
-    setOtp(newOtp)
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
-    // Move to next input if value is entered
-    if (value && index < 3) {
-      inputRefs.current[index + 1]?.focus()
+    if (value && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
-  }
+  };
 
-  const handleVerify = () => {
-    // Add verification logic here
-    navigation.navigate("MainTabs")
-  }
+  const handleVerify = async () => {
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) {
+      setError("Please enter a valid 6-digit code");
+      return;
+    }
+  
+    // Ensure verificationId is not null
+    if (!verificationId) {
+      setError("Invalid verification ID. Please try again.");
+      return;
+    }
+  
+    setLoading(true);
+    setError("");
+  
+    try {
+      const credential = auth.PhoneAuthProvider.credential(verificationId, otpCode);
+      await auth().signInWithCredential(credential);
+      navigation.navigate("MainTabs");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const formattedPhoneNumber = `+91${phoneNumber}`;
+      await auth().signInWithPhoneNumber(formattedPhoneNumber);
+      setError("Code resent successfully!");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,7 +76,7 @@ export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) =>
 
       <Text style={styles.description}>
         Thank you for registering with us. Please type the OTP{"\n"}
-        as shared on your mobile number {route.params.phoneNumber}
+        as shared on your mobile number {phoneNumber}
       </Text>
 
       <View style={styles.otpContainer}>
@@ -54,18 +93,29 @@ export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) =>
         ))}
       </View>
 
+      {error && <Text style={styles.errorText}>{error}</Text>}
+
       <View style={styles.resendContainer}>
-        <Text style={styles.resendText}>
-          Didn't get the OTP? No worries try again. <Text style={styles.resendLink}>Resend</Text>
-        </Text>
+        <TouchableOpacity onPress={handleResend} disabled={loading}>
+          <Text style={styles.resendText}>
+            Didn't get the OTP? No worries try again.{" "}
+            <Text style={[styles.resendLink, loading && styles.disabledText]}>
+              {loading ? "Sending..." : "Resend"}
+            </Text>
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.verifyButton} onPress={handleVerify}>
-        <Text style={styles.verifyButtonText}>Verify</Text>
+      <TouchableOpacity
+        style={[styles.verifyButton, loading && styles.buttonDisabled]}
+        onPress={handleVerify}
+        disabled={loading}
+      >
+        <Text style={styles.verifyButtonText}>{loading ? "Verifying..." : "Verify"}</Text>
       </TouchableOpacity>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -137,5 +187,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-})
-
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  disabledText: {
+    opacity: 0.5,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+});

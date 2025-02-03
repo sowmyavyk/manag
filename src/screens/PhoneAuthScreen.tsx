@@ -1,20 +1,42 @@
-import type React from "react"
-import { useState } from "react"
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Linking } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import type { NativeStackScreenProps } from "@react-navigation/native-stack"
-import type { RootStackParamList } from "@/navigation/types"
+import type React from "react";
+import { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Linking } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/navigation/types";
+import auth from "@react-native-firebase/auth";
 
-type Props = NativeStackScreenProps<RootStackParamList, "PhoneAuth">
+type Props = NativeStackScreenProps<RootStackParamList, "PhoneAuth">;
 
 export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (phoneNumber.length >= 10) {
-      navigation.navigate("OtpVerification", { phoneNumber })
+      setLoading(true);
+      setError("");
+      try {
+        const formattedPhoneNumber = `+91${phoneNumber}`; // Format with country code
+        const confirmation = await auth().signInWithPhoneNumber(formattedPhoneNumber);
+  
+        // Ensure verificationId is not null before navigating
+        if (confirmation.verificationId) {
+          navigation.navigate("OtpVerification", {
+            phoneNumber,
+            verificationId: confirmation.verificationId,
+          });
+        } else {
+          setError("Failed to send OTP. Please try again.");
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,17 +71,19 @@ export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         </Text>
 
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
         <TouchableOpacity
-          style={[styles.button, !phoneNumber && styles.buttonDisabled]}
+          style={[styles.button, (!phoneNumber || loading) && styles.buttonDisabled]}
           onPress={handleNext}
-          disabled={!phoneNumber}
+          disabled={!phoneNumber || loading}
         >
-          <Text style={styles.buttonText}>Next</Text>
+          <Text style={styles.buttonText}>{loading ? "Sending Code..." : "Next"}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -137,5 +161,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-})
-
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+});
