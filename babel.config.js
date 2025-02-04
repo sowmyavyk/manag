@@ -1,6 +1,7 @@
 module.exports = function (api) {
     api.cache(true);
     return {
+      plugins: ['react-native-web'],
       presets: ['babel-preset-expo'],
       plugins: [
         [
@@ -14,7 +15,7 @@ module.exports = function (api) {
               '@screens': './src/screens',
               '@navigation': './src/navigation',
               '@constants': './src/constants',
-              '@utils': './src/utils'
+              '@utils': './src/utils',
             }
           }
         ]

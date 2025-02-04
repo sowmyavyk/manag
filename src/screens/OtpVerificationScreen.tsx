@@ -5,7 +5,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "@/navigation/types";
 import auth from "@react-native-firebase/auth";
-
 type Props = NativeStackScreenProps<RootStackParamList, "OtpVerification">;
 
 export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) => {
@@ -32,7 +31,6 @@ export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) =>
       return;
     }
   
-    // Ensure verificationId is not null
     if (!verificationId) {
       setError("Invalid verification ID. Please try again.");
       return;
@@ -65,7 +63,6 @@ export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) =>
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.logoContainer}>

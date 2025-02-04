@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "@/navigation/types";
 import auth from "@react-native-firebase/auth";
-
+import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 type Props = NativeStackScreenProps<RootStackParamList, "PhoneAuth">;
 
 export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
@@ -21,7 +21,6 @@ export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
         const formattedPhoneNumber = `+91${phoneNumber}`; // Format with country code
         const confirmation = await auth().signInWithPhoneNumber(formattedPhoneNumber);
   
-        // Ensure verificationId is not null before navigating
         if (confirmation.verificationId) {
           navigation.navigate("OtpVerification", {
             phoneNumber,
