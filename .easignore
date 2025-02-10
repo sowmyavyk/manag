@@ -1,0 +1,12 @@
+# Exclude large folders
+node_modules/
+android/
+ios/
+.git/
+assets/
+
+# Exclude unnecessary files
+*.log
+*.md
+yarn.lock
+package-lock.json
