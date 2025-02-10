@@ -1,52 +1,49 @@
-import type React from "react";
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Linking } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "@/navigation/types";
-import auth from "@react-native-firebase/auth";
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
-type Props = NativeStackScreenProps<RootStackParamList, "PhoneAuth">;
+import type React from "react"
+import { useState } from "react"
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Linking, Alert } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import type { NativeStackScreenProps } from "@react-navigation/native-stack"
+import type { RootStackParamList } from "@/navigation/types"
+
+type Props = NativeStackScreenProps<RootStackParamList, "PhoneAuth">
 
 export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleNext = async () => {
     if (phoneNumber.length >= 10) {
-      setLoading(true);
-      setError("");
+      setIsLoading(true)
       try {
-        const formattedPhoneNumber = `+91${phoneNumber}`; // Format with country code
-        const confirmation = await auth().signInWithPhoneNumber(formattedPhoneNumber);
-  
-        if (confirmation.verificationId) {
-          navigation.navigate("OtpVerification", {
-            phoneNumber,
-            verificationId: confirmation.verificationId,
-          });
+        const response = await fetch(
+          `https://otpverification-crav.onrender.com/api/otp/send?phoneNumber=${phoneNumber}`,
+          {
+            method: 'POST',
+          }
+        )
+        
+        if (response.ok) {
+          navigation.navigate("OtpVerification", { phoneNumber, verificationId: null });
         } else {
-          setError("Failed to send OTP. Please try again.");
+          Alert.alert("Error", "Failed to send OTP. Please try again.")
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (error) {
+        Alert.alert("Error", "Network error. Please check your connection.")
       } finally {
-        setLoading(false);
+        setIsLoading(false)
       }
     }
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Logo Section */}
       <View style={styles.logoContainer}>
         <Image source={require("../../assets/iitblogo.png")} style={styles.logo} resizeMode="contain" />
       </View>
 
-      {/* Form Section */}
       <View style={styles.formContainer}>
-        <Text style={styles.title}>Can we get your number ?</Text>
+        <Text style={styles.title}>Can we get your number?</Text>
 
         <View style={styles.inputContainer}>
           <View style={styles.countryCode}>
@@ -70,19 +67,20 @@ export const PhoneAuthScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
         </Text>
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
-
         <TouchableOpacity
-          style={[styles.button, (!phoneNumber || loading) && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            (!phoneNumber || isLoading) && styles.buttonDisabled
+          ]}
           onPress={handleNext}
-          disabled={!phoneNumber || loading}
+          disabled={!phoneNumber || isLoading}
         >
-          <Text style={styles.buttonText}>{loading ? "Sending Code..." : "Next"}</Text>
+          <Text style={styles.buttonText}>{isLoading ? "Sending..." : "Next"}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -160,9 +158,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-});
+})

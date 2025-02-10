@@ -1,5 +1,5 @@
 import React from "react"
-import { NavigationContainer } from "@react-navigation/native"
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { PhoneAuthScreen } from "@/screens/PhoneAuthScreen"
 import { OtpVerificationScreen } from "@/screens/OtpVerificationScreen"

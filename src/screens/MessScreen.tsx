@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Modal, ActivityIndicator, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Star, Edit2, ChevronDown, Download } from "lucide-react-native"
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs';
 import * as FileSystem from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 
@@ -160,32 +160,59 @@ export const MessScreen = () => {
       const mealSummaryData = await mealSummaryResponse.json();
       const studentRatingsData = await studentRatingsResponse.json();
   
-      // Create workbook for meal summary
-      const mealWs = XLSX.utils.json_to_sheet(mealSummaryData);
-      const mealWb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(mealWb, mealWs, "Meal Summary");
+      // Create a new workbook for meal summary
+      const mealWorkbook = new ExcelJS.Workbook();
+      const mealWorksheet = mealWorkbook.addWorksheet('Meal Summary');
+      
+      // Add headers to the meal summary sheet
+      mealWorksheet.columns = [
+        { header: 'ID', key: 'id', width: 10 },
+        { header: 'Date', key: 'date', width: 15 },
+        { header: 'Meal Type', key: 'mealType', width: 15 },
+        { header: 'Total Students Rated', key: 'totalStudentsRated', width: 20 },
+        { header: 'Average Rating', key: 'averageRating', width: 15 },
+        { header: 'Summarized Feedback', key: 'summarizedFeedback', width: 30 }
+      ];
   
-      // Create workbook for student ratings
-      const ratingsWs = XLSX.utils.json_to_sheet(studentRatingsData);
-      const ratingsWb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(ratingsWb, ratingsWs, "Student Ratings");
+      // Add data to the meal summary sheet
+      mealSummaryData.forEach((meal: any) => {
+        mealWorksheet.addRow(meal);
+      });
   
-      // Convert workbooks to base64 strings
-      const mealWbout = XLSX.write(mealWb, { type: 'base64', bookType: 'xlsx' });
-      const ratingsWbout = XLSX.write(ratingsWb, { type: 'base64', bookType: 'xlsx' });
+      // Create a new workbook for student ratings
+      const ratingsWorkbook = new ExcelJS.Workbook();
+      const ratingsWorksheet = ratingsWorkbook.addWorksheet('Student Ratings');
   
-      // Save files using expo-file-system
+      // Add headers to the student ratings sheet
+      ratingsWorksheet.columns = [
+        { header: 'ID', key: 'id', width: 10 },
+        { header: 'Roll Number', key: 'rollNumber', width: 15 },
+        { header: 'Date', key: 'date', width: 15 },
+        { header: 'Meal Type', key: 'mealType', width: 15 },
+        { header: 'Rating', key: 'rating', width: 10 },
+        { header: 'Feedback', key: 'feedback', width: 30 }
+      ];
+  
+      // Add data to the student ratings sheet
+      studentRatingsData.forEach((rating: any) => {
+        ratingsWorksheet.addRow(rating);
+      });
+  
+      // Save workbooks to files
       const mealFileUri = FileSystem.documentDirectory + 'meal_summary.xlsx';
       const ratingsFileUri = FileSystem.documentDirectory + 'student_ratings.xlsx';
   
-      await Promise.all([
-        FileSystem.writeAsStringAsync(mealFileUri, mealWbout, {
-          encoding: FileSystem.EncodingType.Base64
-        }),
-        FileSystem.writeAsStringAsync(ratingsFileUri, ratingsWbout, {
-          encoding: FileSystem.EncodingType.Base64
-        })
-      ]);
+      // Write meal summary workbook to file
+      const mealBuffer = await mealWorkbook.xlsx.writeBuffer();
+      await FileSystem.writeAsStringAsync(mealFileUri, Buffer.from(mealBuffer).toString('base64'), {
+        encoding: FileSystem.EncodingType.Base64
+      });
+  
+      // Write student ratings workbook to file
+      const ratingsBuffer = await ratingsWorkbook.xlsx.writeBuffer();
+      await FileSystem.writeAsStringAsync(ratingsFileUri, Buffer.from(ratingsBuffer).toString('base64'), {
+        encoding: FileSystem.EncodingType.Base64
+      });
   
       // Share files using expo-sharing
       if (await Sharing.isAvailableAsync()) {
