@@ -2,6 +2,7 @@
   "expo": {
     "name": "manag",
     "slug": "manag",
+    "owner": "sowmyavyk21",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,7 +28,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "580169f6-0cb2-4b63-9f87-753fd0c48186"
+        "projectId": "38688957-e348-4df0-9062-d17c001d4c4e"
       }
     }
   }
