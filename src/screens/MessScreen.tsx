@@ -1,3 +1,6 @@
+import { API_URL, FOOD_RATING_URL } from "@env";
+//import { Buffer } from "buffer";
+
 import React, { useState, useEffect } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, TextInput, Modal, ActivityIndicator, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -668,4 +671,3 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 })
-

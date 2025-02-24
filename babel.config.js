@@ -1,24 +1,24 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: ["babel-preset-expo"],
     plugins: [
       [
-        'module-resolver',
+        "module-resolver",
         {
-          root: ['./src'],
-          extensions: ['.ios.js', '.android.js', '.js', '.ts', '.tsx', '.json'],
+          root: ["./src"],
           alias: {
-            '@': './src',
-            '@components': './src/components',
-            '@screens': './src/screens',
-            '@navigation': './src/navigation',
-            '@constants': './src/constants',
-            '@utils': './src/utils',
+            "@": "./src",
+            "@components": "./src/components",
+            "@screens": "./src/screens",
+            "@navigation": "./src/navigation",
+            "@constants": "./src/constants",
+            "@utils": "./src/utils"
           }
         }
       ],
-      'react-native-reanimated/plugin' // Required for Reanimated
+      "module:react-native-dotenv",
+      "react-native-reanimated/plugin"
     ]
   };
 };

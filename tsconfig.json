@@ -1,14 +1,7 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-native",
-    "strict": true,
-    "esModuleInterop": true,
     "baseUrl": "./",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
@@ -17,5 +10,7 @@
       "@constants/*": ["src/constants/*"],
       "@utils/*": ["src/utils/*"]
     }
-  }
+  },
+  "include": ["src", "env.d.ts"],
+  "exclude": ["node_modules", "babel.config.js"]
 }

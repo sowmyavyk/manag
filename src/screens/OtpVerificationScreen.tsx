@@ -77,9 +77,8 @@ export const OtpVerificationScreen: React.FC<Props> = ({ route, navigation }) =>
       <View style={styles.logoContainer}>
         <Image source={require("../../assets/iitblogo.png")} style={styles.logo} resizeMode="contain" />
       </View>
-
+      
       <Text style={styles.title}>Enter verification code</Text>
-
       <Text style={styles.description}>
         Thank you for registering with us. Please type the OTP{"\n"}
         as shared on your mobile number {route.params.phoneNumber}

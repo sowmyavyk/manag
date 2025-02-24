@@ -4,8 +4,6 @@ import { User, Utensils } from "lucide-react-native"
 import  {ProfileScreen}  from "@/screens/ProfileScreen"
 import {MessScreen} from "@/screens/MessScreen"
 import type { MainTabParamList } from "./types"
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
 export const BottomTabs = () => {
